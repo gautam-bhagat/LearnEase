@@ -1,5 +1,5 @@
 const app = require("./app");
-const port = 1512
+const port = 4000
 app.listen(port, () => {
   console.log(`http://localhost:${port}`);
 });

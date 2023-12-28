@@ -5,7 +5,7 @@ const app = express();
 
 // const port = 4000;
 
-const { Persona } = require("./models");
+const { Persona , Course } = require("./models");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
@@ -136,14 +136,33 @@ app.post(
   }
 );
 
-app.get("/home", connectEnsureLogin.ensureLoggedIn(), (req, res) => {
+app.get("/home", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   if (req.accepts("html")) {
-    console.log(req.user.firstName);
-    res.render("home", { csrfToken: req.csrfToken(), user: req.user });
+    
+    const courses = await Course.findAll({where : { teacherId : parseInt(req.user.id)}})
+   
+    res.render("home", { csrfToken: req.csrfToken(), user: req.user,courses });
   }
 });
 
 //API Requests
+
+app.post(
+  "/addcourse",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    try {
+      let { teacherId, courseName, courseDescription } = req.body;
+      teacherId = parseInt(teacherId);
+      const courseObj = await Course.createCourse({ teacherId , courseName,courseDescription })
+      console.log(courseObj)
+      res.redirect("/home");
+    } catch (error) {
+      console.log(error)
+      res.redirect("/home");
+    }
+  }
+);
 
 app.get("/signout", (request, response, next) => {
   //signout
