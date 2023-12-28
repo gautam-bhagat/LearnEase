@@ -21,33 +21,28 @@
 
     <div class="w-full flex justify-center">
       <div class="w-5/6">
-        <div class="flex m-5 justify-start">
-          <button data-modal-target="add-course-modal" data-modal-toggle="add-course-modal" class="p-3 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Course</button>
+       
+        <div class="border rounded-lg drop-shadow-lg m-5 flex  justify-between items-center p-10 justify-self-center">
+         <div>
+          <h2 class="text-xl ">Course Name : <b><%= course.courseName %></b></h2>
+          <h2 class="text-xl ">Description :<b> <%= course.courseDescription %></b></h2>
+          <h2 class="text-xl ">Educator : <b><%= user.firstName + " "+user.lastName %></b></h2>
+         </div>
+         <button data-modal-target="add-chapter-modal" data-modal-toggle="add-chapter-modal" class="p-3 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Chapter</button>
 
-          <a
-            class="p-3 text-white font-normal bg-purple-700 rounded mr-5"
-            href="#your-courses"
-            >View Courses</a
-          >
-          <a class="p-3 text-white font-normal bg-sky-600 rounded mr-5" href="/"
-            >Report</a
-          >
-
-         
         </div>
-       <h2 class="text-center text-3xl m-5 font-bold">Your Courses</h2>
-        <div id="your-courses" class="w-full p-2 grid grid-cols-3 gap-3">
-          <% for(let i=0; i< courses.length ; i++) { %> 
-            <div class="p-5 border  rounded"> 
-              <h2 class="font-bold"><%= courses[i].courseName %></h2>
-              <p class="p-1"><%= courses[i].courseDescription %></p>
-              <h4 class="font-bold text-right"><%= user.firstName +" "+user.lastName %></h4>
-              <a href="/viewcourse/<%= courses[i].id %>" class="w-full p-2 text-white font-normal rounded mt-6 bg-green-700"> View Course</a>
-            </div>
-          <% } %>
-        </div>
-        
+        <h2 class="text-center text-3xl m-5 font-bold text-green-600 underline"> CHAPTERS </h2>
+        <div class="w-full p-2 grid grid-cols-3 gap-1">
+        <%  for(let i = 0; i < chapters.length ; i++) { %>
+         <a href="/viewchapter/<%= chapters[i].id %>/<%= chapters[i].chapterName %>">
+          <div class="p-3  border rounded my-2">
+            <div class="font-bold  p-1"> <%= `${i+1}. ${chapters[i].chapterName} ` %> </div>
+            <p class="mx-2"> <%= ` ${chapters[i].chapterDescription} ` %> </p>
+           </div>
 
+         </a>
+        <% } %>
+        </div>
       </div>
     </div>
 
@@ -55,7 +50,7 @@
 
     <!-- Main modal -->
     <div
-      id="add-course-modal"
+      id="add-chapter-modal"
       tabindex="-1"
       aria-hidden="true"
       class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
@@ -68,12 +63,12 @@
             class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-black-600"
           >
             <h3 class="text-xl font-semibold text-black-900 dark:text-black">
-              Add New Course
+              Add New Chapter
             </h3>
             <button
               type="button"
               class="text-black-400 bg-transparent hover:bg-white-200 hover:text-black-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-white-600 dark:hover:text-black"
-              data-modal-hide="add-course-modal"
+              data-modal-hide="add-chapter-modal"
             >
               <svg
                 class="w-3 h-3"
@@ -95,32 +90,32 @@
           </div>
           <!-- Modal body -->
           <div class="p-4 md:p-5 space-y-4">
-            <form class=" mx-auto" action="/addcourse" method="post">
+            <form class=" mx-auto" action="/addchapter" method="post">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <input type="hidden" name="teacherId" value="<%= user.id %>">
+                <input type="hidden" name="courseId" value="<%= course.id %>">
               <div class="mb-5">
                 <label
-                  for="courseName"
+                  for="chapterName"
                   class="block mb-2 text-sm font-medium text-black dark:text-black"
-                  >Course Name</label
+                  >Chapter Name</label
                 >
                 <input
                   type="text"
-                  id="courseName" name="courseName"
+                  id="chapterName" name="chapterName"
                   class="bg-black-50 border border-black-300 text-black-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-black-700 dark:border-black-600 dark:placeholder-black-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="Course Name"
+                  placeholder="Chapter Name"
                   required
                 />
               </div>
               <div class="mb-5">
                 <label
-                  for="courseDescription"
+                  for="chapterDescription"
                   class="block mb-2 text-sm font-medium text-black-900 dark:text-black"
-                  >Course Description</label
+                  >Chapter Description</label
                 >
                 <textarea
-                  name="courseDescription"
-                  id="courseDescription"
+                  name="chapterDescription"
+                  id="chapterDescription"
                   class="bg-black-50 border border-black-300 text-black-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-black-700 dark:border-black-600 dark:placeholder-black-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500" rows="5" placeholder="Add Description"
                   required
                 ></textarea>

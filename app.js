@@ -5,7 +5,7 @@ const app = express();
 
 // const port = 4000;
 
-const { Persona , Course } = require("./models");
+const { Persona , Course ,Chapter } = require("./models");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
@@ -101,18 +101,14 @@ app.get("/", (req, res) => {
 });
 
 app.get("/signup", (req, res) => {
-  if (req.isAuthenticated()) {
-    return res.redirect("/home");
-  }
+  
   if (req.accepts("html")) {
     res.render("signup", { csrfToken: req.csrfToken() });
   }
 });
 
 app.get("/login", (req, res) => {
-  if (req.isAuthenticated()) {
-    return res.redirect("/home");
-  }
+  
   if (req.accepts("html")) {
     res.render("signin", { csrfToken: req.csrfToken() });
   }
@@ -137,6 +133,12 @@ app.post(
 );
 
 app.get("/home", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+
+  console.log(req.user.role)
+  if(req.user.role==='student'){
+  return res.redirect("/signup")
+  }
+
   if (req.accepts("html")) {
     
     const courses = await Course.findAll({where : { teacherId : parseInt(req.user.id)}})
@@ -145,7 +147,40 @@ app.get("/home", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   }
 });
 
+
+app.get("/viewcourse/:courseid", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  if(req.user.role==='student'){
+    return res.redirect("/signup")
+  }
+  if (req.accepts("html")) {
+    
+    const course = await Course.findOne({where : { id : parseInt(req.params.courseid)}})
+    const chapters = await Chapter.findAll({where : { courseId : parseInt(req.params.courseid) }})
+    res.render("viewcourse", { csrfToken: req.csrfToken(), user: req.user,course : course,chapters});
+  }
+});
+
+
 //API Requests
+
+
+app.post(
+  "/addchapter",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    console.log(req.body)
+    let { courseId, chapterName, chapterDescription } = req.body;
+    try {
+     
+      const chapter = await Chapter.createChapter({ courseId, chapterName, chapterDescription })
+      
+      res.redirect(`/viewcourse/${courseId}`);
+    } catch (error) {
+      console.log(error)
+      res.redirect(`/viewcourse/${courseId}`);
+    }
+  }
+);
 
 app.post(
   "/addcourse",
