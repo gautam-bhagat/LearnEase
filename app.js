@@ -160,7 +160,7 @@ app.get("/viewcourse/:courseid", connectEnsureLogin.ensureLoggedIn(), async (req
   }
 });
 
-app.get("/viewchapter/:chapterid/:chaptertitle", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+app.get("/viewchapter/:chapterid", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   if(req.user.role==='student'){
     return res.redirect("/signup")
   }
@@ -172,7 +172,7 @@ app.get("/viewchapter/:chapterid/:chaptertitle", connectEnsureLogin.ensureLogged
   }
 });
 
-app.get("/addpage/:chapterid/:chaptertitle", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+app.get("/addpage/:chapterid", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   if(req.user.role==='student'){
     return res.redirect("/signup")
   }
@@ -180,6 +180,7 @@ app.get("/addpage/:chapterid/:chaptertitle", connectEnsureLogin.ensureLoggedIn()
     // let chapterid = req.params.chapterid
     const chapter = await Chapter.findOne({where : { id : parseInt(req.params.chapterid)}})
     const pages = await Page.findAll({where : { chapterId : parseInt(req.params.chapterid) }})
+    console.log(pages)
     res.render("addpage", { csrfToken: req.csrfToken(), user: req.user,chapter,pages});
   }
 });
@@ -187,6 +188,19 @@ app.get("/addpage/:chapterid/:chaptertitle", connectEnsureLogin.ensureLoggedIn()
 
 //API Requests
 
+app.post("/addpage",async(req,res)=>{
+
+  let {chapterId, title,content} = req.body
+  console.log(req.body)
+  try {
+    const pg = await Page.create({chapterId, title,content})
+    console.log(pg)
+    return res.redirect(`/viewchapter/${chapterId}`)
+  } catch (error) {
+    return res.redirect(`/viewchapter/${chapterId}`)
+  }
+
+})
 
 app.post(
   "/addchapter",

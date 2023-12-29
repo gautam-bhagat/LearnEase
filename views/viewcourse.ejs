@@ -1,8 +1,9 @@
 <!doctype html>
 <html lang="en">
   <head>
- 
-    <%-  include('headtag.ejs') %>
+    
+    <%- include('headtag.ejs') %>
+    
   </head>
   <body class="w-full justify-self-center flex flex-col">
     <%- include('pvtheader.ejs') %>
@@ -22,7 +23,7 @@
         <h2 class="text-center text-3xl m-5 font-bold text-green-600 underline"> CHAPTERS </h2>
         <div class="w-full p-2 grid grid-cols-3 gap-1">
         <%  for(let i = 0; i < chapters.length ; i++) { %>
-         <a href="/viewchapter/<%= chapters[i].id %>/<%= chapters[i].chapterName %>">
+         <a href="/viewchapter/<%= chapters[i].id %>">
           <div class="p-3  border rounded my-2">
             <div class="font-bold  p-1"> <%= `${i+1}. ${chapters[i].chapterName} ` %> </div>
             <p class="mx-2"> <%= ` ${chapters[i].chapterDescription} ` %> </p>

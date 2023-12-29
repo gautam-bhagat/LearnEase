@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
  
-    <%-  include('headtag.ejs') %>
+    <%- include('headtag.ejs') %>
   </head>
   <body class="w-full justify-self-center flex flex-col">
     <%- include('pvtheader.ejs') %>
@@ -15,7 +15,7 @@
           <h2 class=" "> <b><%= chapter.chapterName %></b></h2>
          <span><%= chapter.chapterDescription %></span>
          </div>
-         <a href="/addpage/<%= chapter.id %>/<%= chapter.chapterName %>" class="p-3 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Chapter</a>
+         <a href="/addpage/<%= chapter.id %>" class="p-3 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Chapter</a>
 
         </div>
         <h2 class="text-center text-3xl m-5 font-bold text-green-600 underline"> PAGES </h2>
