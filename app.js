@@ -200,22 +200,25 @@ app.get("/addpage/:chapterid", connectEnsureLogin.ensureLoggedIn(), async (req, 
   }
 });
 
-app.get("/viewpage/:pageid", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+app.get("/viewpage/:chapterid/:pageindex", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   if(req.user.role==='student'){
     return res.redirect("/signup")
   }
   try {
     if (req.accepts("html")) {
-      // let chapterid = req.params.chapterid
-      const page = await Page.findOne({where : { id : parseInt(req.params.pageid)}})
-      const chapter = await Chapter.findOne({where : { id : page.chapterId }})
+      let index = req.params.pageindex
+      const allPages =  await Page.findAll({where : {chapterId :parseInt(req.params.chapterid) }})
+      
+      const chapter = await Chapter.findOne({where : { id : allPages[0].chapterId }})
       const course = await Course.findOne({where : { id :  chapter.courseId}})
-      if(course.teacherId !== req.user.id){
+     if(course.teacherId !== req.user.id){
+        console.log("Error : Not yours")
         return res.redirect("/home")
       }
-      res.render("viewpage", { csrfToken: req.csrfToken(), user: req.user,page,chapter,course});
+      res.render("viewpage", { csrfToken: req.csrfToken(), user: req.user,page : allPages[index],chapter,course,pageIndex : index,allPages});
     }
   } catch (error) {
+    console.log("Error : ",error)
     res.redirect("/home")
   }
 });
