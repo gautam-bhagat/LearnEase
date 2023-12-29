@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
       Course.belongsTo(models.Persona,{
         foreignKey : "teacherId"
       })
+
+      Course.hasMany(models.Chapter, {
+        foreignKey : "courseId"
+      })
     }
 
     static createCourse({ teacherId , courseName,courseDescription }){

@@ -5,7 +5,7 @@ const app = express();
 
 // const port = 4000;
 
-const { Persona , Course ,Chapter } = require("./models");
+const { Persona , Course ,Chapter ,Page} = require("./models");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
@@ -96,7 +96,7 @@ app.get("/", (req, res) => {
     return res.redirect("/home");
   }
   if (req.accepts("html")) {
-    res.render("index");
+    res.render("index",{csrfToken : req.csrfToken()});
   }
 });
 
@@ -157,6 +157,30 @@ app.get("/viewcourse/:courseid", connectEnsureLogin.ensureLoggedIn(), async (req
     const course = await Course.findOne({where : { id : parseInt(req.params.courseid)}})
     const chapters = await Chapter.findAll({where : { courseId : parseInt(req.params.courseid) }})
     res.render("viewcourse", { csrfToken: req.csrfToken(), user: req.user,course : course,chapters});
+  }
+});
+
+app.get("/viewchapter/:chapterid/:chaptertitle", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  if(req.user.role==='student'){
+    return res.redirect("/signup")
+  }
+  if (req.accepts("html")) {
+    // let chapterid = req.params.chapterid
+    const chapter = await Chapter.findOne({where : { id : parseInt(req.params.chapterid)}})
+    const pages = await Page.findAll({where : { chapterId : parseInt(req.params.chapterid) }})
+    res.render("viewchapter", { csrfToken: req.csrfToken(), user: req.user,chapter,pages});
+  }
+});
+
+app.get("/addpage/:chapterid/:chaptertitle", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  if(req.user.role==='student'){
+    return res.redirect("/signup")
+  }
+  if (req.accepts("html")) {
+    // let chapterid = req.params.chapterid
+    const chapter = await Chapter.findOne({where : { id : parseInt(req.params.chapterid)}})
+    const pages = await Page.findAll({where : { chapterId : parseInt(req.params.chapterid) }})
+    res.render("addpage", { csrfToken: req.csrfToken(), user: req.user,chapter,pages});
   }
 });
 

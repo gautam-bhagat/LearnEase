@@ -12,20 +12,19 @@
        
         <div class="border rounded-lg drop-shadow-lg m-5 flex  justify-between items-center p-10 justify-self-center">
          <div>
-          <h2 class="text-xl ">Course Name : <b><%= course.courseName %></b></h2>
-          <h2 class="text-xl ">Description :<b> <%= course.courseDescription %></b></h2>
-          <h2 class="text-xl ">Educator : <b><%= user.firstName + " "+user.lastName %></b></h2>
+          <h2 class=" "> <b><%= chapter.chapterName %></b></h2>
+         <span><%= chapter.chapterDescription %></span>
          </div>
-         <button data-modal-target="add-chapter-modal" data-modal-toggle="add-chapter-modal" class="p-3 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Chapter</button>
+         <a href="/addpage/<%= chapter.id %>/<%= chapter.chapterName %>" class="p-3 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Chapter</a>
 
         </div>
-        <h2 class="text-center text-3xl m-5 font-bold text-green-600 underline"> CHAPTERS </h2>
+        <h2 class="text-center text-3xl m-5 font-bold text-green-600 underline"> PAGES </h2>
         <div class="w-full p-2 grid grid-cols-3 gap-1">
-        <%  for(let i = 0; i < chapters.length ; i++) { %>
-         <a href="/viewchapter/<%= chapters[i].id %>/<%= chapters[i].chapterName %>">
+        <%  for(let i = 0; i < pages.length ; i++) { %>
+         <a href="/viewpage/<%= pages[i].id %>/<%= pages[i].title %>">
           <div class="p-3  border rounded my-2">
-            <div class="font-bold  p-1"> <%= `${i+1}. ${chapters[i].chapterName} ` %> </div>
-            <p class="mx-2"> <%= ` ${chapters[i].chapterDescription} ` %> </p>
+            <div class="font-bold  p-1"> <%= `${i+1}. ${pages[i].title} ` %> </div>
+           
            </div>
 
          </a>
@@ -80,7 +79,7 @@
           <div class="p-4 md:p-5 space-y-4">
             <form class=" mx-auto" action="/addchapter" method="post">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <input type="hidden" name="courseId" value="<%= course.id %>">
+                <input type="hidden" name="courseId" value="<%= chapter.id %>">
               <div class="mb-5">
                 <label
                   for="chapterName"
