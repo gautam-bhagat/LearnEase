@@ -15,13 +15,14 @@
           <h2 class=" "> <b><%= chapter.chapterName %></b></h2>
          <span><%= chapter.chapterDescription %></span>
          </div>
-         <a href="/addpage/<%= chapter.id %>" class="p-3 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Chapter</a>
+         <a href="/addpage/<%= chapter.id %>" class="p-3 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Page</a>
 
         </div>
+        <span class="p-2 font-bold text-green-700"> <a href="/">Home</a> >> <a href="/viewcourse/<%= course.id %>"><%= course.courseName %></a> >> <a href="/viewchapter/<%= chapter.id %>"><%= chapter.chapterName  %></a></span>
         <h2 class="text-center text-3xl m-5 font-bold text-green-600 underline"> PAGES </h2>
         <div class="w-full p-2 grid grid-cols-3 gap-1">
         <%  for(let i = 0; i < pages.length ; i++) { %>
-         <a href="/viewpage/<%= pages[i].id %>/<%= pages[i].title %>">
+         <a href="/viewpage/<%= pages[i].id %>">
           <div class="p-3  border rounded my-2">
             <div class="font-bold  p-1"> <%= `${i+1}. ${pages[i].title} ` %> </div>
            

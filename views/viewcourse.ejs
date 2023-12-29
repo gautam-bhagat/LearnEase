@@ -10,7 +10,6 @@
 
     <div class="w-full flex justify-center">
       <div class="w-5/6">
-       
         <div class="border rounded-lg drop-shadow-lg m-5 flex  justify-between items-center p-10 justify-self-center">
          <div>
           <h2 class="text-xl "> <b><%= course.courseName %></b></h2>
@@ -20,6 +19,8 @@
          <button data-modal-target="add-chapter-modal" data-modal-toggle="add-chapter-modal" class="px-5 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Chapter</button>
 
         </div>
+        
+        <span class="p-2 font-bold text-green-700"> <a href="/">Home</a> >> <a href="#"><%= course.courseName %></a></span>
         <h2 class="text-center text-3xl m-5 font-bold text-green-600 underline"> CHAPTERS </h2>
         <div class="w-full p-2 grid grid-cols-3 gap-1">
         <%  for(let i = 0; i < chapters.length ; i++) { %>

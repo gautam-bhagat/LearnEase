@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+ 
+    <%- include('headtag.ejs') %>
+  </head>
+  <body class="w-full justify-self-center flex flex-col">
+    <%- include('pvtheader.ejs') %>
+
+    <div class="w-full flex justify-center">
+      <div class="w-5/6">
+    
+        <span class="p-2 font-bold text-green-700"> <a href="/">Home</a> >> <a href="/viewcourse/<%= course.id %>"><%= course.courseName %></a> >> <a href="/viewchapter/<%= chapter.id %>"><%= chapter.chapterName  %></a> >> <a href="/viewpage/<%= page.id %>"><%=  page.title %></a></span>
+        <div class="w-full p-2 mt-5">
+            <span class="py-5 mt-5"><%= chapter.chapterName %></span>
+            <h2 class="text-2xl font-bold pt-5"><%= page.title %></h2>
+            
+            <p class="p-5 "><%- page.content %></p>
+        </div>
+      </div>
+    </div>
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+  </body>
+</html>
