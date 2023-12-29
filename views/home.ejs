@@ -27,7 +27,7 @@
           <% for(let i=0; i< courses.length ; i++) { %> 
             <div class="p-5 border  rounded"> 
               <h2 class="font-bold"><%= courses[i].courseName %></h2>
-              <p class="p-1"><%= courses[i].courseDescription %></p>
+              <p class="p-1"><%= courses[i].courseDescription.length > 150 ? courses[i].courseDescription.substring(0,150)+"...." : courses[i].courseDescription %></p>
               <h4 class="font-bold text-right"><%= user.firstName +" "+user.lastName %></h4>
               <a href="/viewcourse/<%= courses[i].id %>" class="w-full p-2 text-white font-normal rounded mt-6 bg-green-700"> View Course</a>
             </div>

@@ -12,11 +12,11 @@
        
         <div class="border rounded-lg drop-shadow-lg m-5 flex  justify-between items-center p-10 justify-self-center">
          <div>
-          <h2 class="text-xl ">Course Name : <b><%= course.courseName %></b></h2>
-          <h2 class="text-xl ">Description :<b> <%= course.courseDescription %></b></h2>
+          <h2 class="text-xl "> <b><%= course.courseName %></b></h2>
+          <p class="font-sm text-justify px-2 "><%= course.courseDescription %></p>
           <h2 class="text-xl ">Educator : <b><%= user.firstName + " "+user.lastName %></b></h2>
          </div>
-         <button data-modal-target="add-chapter-modal" data-modal-toggle="add-chapter-modal" class="p-3 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Chapter</button>
+         <button data-modal-target="add-chapter-modal" data-modal-toggle="add-chapter-modal" class="px-5 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Chapter</button>
 
         </div>
         <h2 class="text-center text-3xl m-5 font-bold text-green-600 underline"> CHAPTERS </h2>

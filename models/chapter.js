@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
   Chapter.init({
     courseId: DataTypes.INTEGER,
     chapterName: DataTypes.STRING,
-    chapterDescription: DataTypes.STRING(255)
+    chapterDescription: DataTypes.TEXT
   }, {
     sequelize,
     modelName: 'Chapter',
