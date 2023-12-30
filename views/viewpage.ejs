@@ -33,10 +33,29 @@
       </div>
     </div>
 
-    <div class="w-full h-16 flex self-end">
-        <div class="w-full mb-5 justify-center inline-flex space-x-2.5">
-           
+    <div class="w-full h-16 flex  flex-col self-end">
+         
+      <% if (user.role == 'student') { %>
+        <div class="w-full justify-center mb-5  flex">
+          <form class="w-full flex justify-center" action="/markpage" method="post">
             
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="studentId" value="<%= user.id %>">
+            <input type="hidden" name="pageIndex" value="<%= pageIndex %>">
+            <input type="hidden" name="teacherId" value="<%= course.teacherId %>">
+            <input type="hidden" name="courseId" value="<%= course.id %>">
+            <input type="hidden" name="chapterId" value="<%= chapter.id %>">
+            <input type="hidden" name="pageId" value="<%=  page.id %>">
+            <input type="hidden" name="completed" value="true">
+            <button type="submit" class=" w-1/2 border  p-2 hover:bg-green-700 bg-green-600 font-sm  text-white rounded-full  justify-self-center"  <%= completed ? "disabled" : ""  %> >   <%= completed ? "Completed" : "Mark as Complete"  %>  </button>
+          </form>
+
+          
+
+        </div>
+    <% } %>
+        <div class="w-full mb-5 justify-center inline-flex space-x-2.5">
+        
             
             <% if (pageIndex > 0) { %>
                 <button onclick="prev()" class="px-5  flex items-center py-2 px-3 rounded font-medium select-none border text-gray-900 bg-white transition-colors hover:border-red-600 hover:bg-red-700 hover:text-white  "   >    << Previous </button>

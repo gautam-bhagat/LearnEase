@@ -5,7 +5,7 @@ const app = express();
 
 // const port = 4000;
 
-const { Persona, Course, Chapter, Page,Enroll } = require("./models");
+const { Persona, Course, Chapter, Page, Enroll } = require("./models");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
@@ -131,31 +131,35 @@ app.post(
 );
 
 app.get("/home", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
-  
   console.log(req.user.role);
   if (req.accepts("html")) {
     if (req.user.role === "student") {
-
-      
       let courses = await Course.findAll();
 
+      let teachers = [];
 
-      let teachers = []
-
-      return res.render("home", {csrfToken: req.csrfToken(),user: req.user,courses,teachers});
+      return res.render("home", {
+        csrfToken: req.csrfToken(),
+        user: req.user,
+        courses,
+        teachers,
+      });
     }
-
-
 
     let teachers = [];
     const courses = await Course.findAll({
       where: { teacherId: parseInt(req.user.id) },
     });
     courses.forEach(async (element) => {
-      teachers.push(req.user.firstName+" "+req.user.lastName)
+      teachers.push(req.user.firstName + " " + req.user.lastName);
     });
 
-    res.render("home", { csrfToken: req.csrfToken(), user: req.user, courses,teachers });
+    res.render("home", {
+      csrfToken: req.csrfToken(),
+      user: req.user,
+      courses,
+      teachers,
+    });
   }
 });
 
@@ -164,33 +168,40 @@ app.get(
   connectEnsureLogin.ensureLoggedIn(),
   async (req, res) => {
     if (req.user.role === "student") {
-      const course = await Course.findOne({
-        where: { id: parseInt(req.params.courseid) },
-      });
-    
-      const chapters = await Chapter.findAll({
-        where: { courseId: parseInt(req.params.courseid) },
-      });
+      try {
+        const course = await Course.findOne({
+          where: { id: parseInt(req.params.courseid) },
+        });
 
-      const teacher = await  Persona.findByPk(course.teacherId)
-      let enrolled = await Enroll.findOne({ where : { courseId : parseInt(req.params.courseid),studentId : req.user.id  }})
-      let ebool = false;
-      
-      if(enrolled){
-        ebool = true
+        const chapters = await Chapter.findAll({
+          where: { courseId: parseInt(req.params.courseid) },
+        });
+
+        const teacher = await Persona.findByPk(course.teacherId);
+        let enrolled = await Enroll.findOne({
+          where: {
+            courseId: parseInt(req.params.courseid),
+            studentId: req.user.id,
+          },
+        });
+        let ebool = false;
+
+        if (enrolled) {
+          ebool = true;
+        }
+
+        return res.render("viewcourse", {
+          csrfToken: req.csrfToken(),
+          user: req.user,
+          teacher: teacher,
+          course: course,
+          enrolled: ebool,
+          chapters,
+        });
+      } catch (error) {
+        return res.redirect("/home");
       }
-
-      return res.render("viewcourse", {
-        csrfToken: req.csrfToken(),
-        user: req.user,
-        teacher: teacher,
-        course: course,
-        enrolled : ebool,
-        chapters,
-      });
     }
-
-
 
     try {
       if (req.accepts("html")) {
@@ -203,7 +214,7 @@ app.get(
         const chapters = await Chapter.findAll({
           where: { courseId: parseInt(req.params.courseid) },
         });
-        res.render("viewcourse", {
+        return res.render("viewcourse", {
           csrfToken: req.csrfToken(),
           user: req.user,
           course: course,
@@ -221,7 +232,34 @@ app.get(
   connectEnsureLogin.ensureLoggedIn(),
   async (req, res) => {
     if (req.user.role === "student") {
-      return res.redirect("/signup");
+      try {
+        if (req.accepts("html")) {
+          const chapter = await Chapter.findOne({
+            where: { id: parseInt(req.params.chapterid) },
+          });
+          const pages = await Page.findAll({
+            where: { chapterId: parseInt(req.params.chapterid) },
+          });
+          const course = await Course.findOne({
+            where: { id: chapter.courseId },
+          });
+          let enrolled = Enroll.findOne({
+            where: { studentId: req.user.id, courseId: course.id },
+          });
+          if (!enrolled) {
+            return res.redirect(`/viewcourse/${course.id}`);
+          }
+          return res.render("viewchapter", {
+            csrfToken: req.csrfToken(),
+            user: req.user,
+            chapter,
+            pages,
+            course,
+          });
+        }
+      } catch (error) {
+        return res.redirect("/home")
+      }
     }
     try {
       if (req.accepts("html")) {
@@ -283,8 +321,40 @@ app.get(
   connectEnsureLogin.ensureLoggedIn(),
   async (req, res) => {
     if (req.user.role === "student") {
-      return res.redirect("/signup");
+      try {
+        let index = req.params.pageindex;
+        const allPages = await Page.findAll({
+          where: { chapterId: parseInt(req.params.chapterid) },
+        });
+
+        const chapter = await Chapter.findOne({
+          where: { id: allPages[0].chapterId },
+        });
+        const course = await Course.findOne({
+          where: { id: chapter.courseId },
+        });
+        
+        let completed = false
+        const checkCompleted =  await Enroll.findOne({where : {studentId: req.user.id, chapterId:chapter.id,pageId: allPages[index].id}})
+        if(checkCompleted){
+          completed=true
+        }
+
+        return res.render("viewpage", {
+          csrfToken: req.csrfToken(),
+          user: req.user,
+          page: allPages[index],
+          chapter,
+          course,
+          pageIndex: index,
+          allPages,completed
+        });
+      } catch (error) {
+        console.log(error)
+        return res.redirect("/home")
+      }
     }
+
     try {
       if (req.accepts("html")) {
         let index = req.params.pageindex;
@@ -322,15 +392,44 @@ app.get(
 //API Requests
 
 app.post("/enroll", async (req, res) => {
-  let {studentId,teacherId,courseId,chapterId,pageId,completed} = req.body
+  let { studentId, teacherId, courseId, chapterId, pageId, completed } =
+    req.body;
   console.log(req.body);
   try {
-    const pg = await Enroll.create({studentId,teacherId,courseId,chapterId,pageId,completed});
+    const pg = await Enroll.create({
+      studentId,
+      teacherId,
+      courseId,
+      chapterId,
+      pageId,
+      completed,
+    });
     console.log(pg);
     return res.redirect(`/viewcourse/${courseId}`);
-
   } catch (error) {
-    console.log(error)
+    console.log(error);
+    return res.redirect(`/viewcourse/${courseId}`);
+  }
+});
+
+
+app.post("/markpage", async (req, res) => {
+  let { pageIndex,studentId, teacherId, courseId, chapterId, pageId, completed } =
+    req.body;
+  console.log(req.body);
+  try {
+    const pg = await Enroll.create({
+      studentId,
+      teacherId,
+      courseId,
+      chapterId,
+      pageId,
+      completed,
+    });
+    console.log(pg);
+    return res.redirect(`/viewpage/${chapterId}/${pageIndex}`);
+  } catch (error) {
+    console.log(error);
     return res.redirect(`/viewcourse/${courseId}`);
   }
 });
@@ -361,7 +460,7 @@ app.post(
         chapterDescription,
       });
 
-      res.redirect(`/viewcourse/${courseId}`);
+      return res.redirect(`/viewcourse/${courseId}`);
     } catch (error) {
       console.log(error);
       res.redirect(`/viewcourse/${courseId}`);

@@ -15,8 +15,9 @@
           <h2 class=" "> <b><%= chapter.chapterName %></b></h2>
          <span><%= chapter.chapterDescription %></span>
          </div>
-         <a href="/addpage/<%= chapter.id %>" class="p-3 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Page</a>
-
+        <% if(user.role=='teacher'){ %>
+          <a href="/addpage/<%= chapter.id %>" class="p-3 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Page</a>
+          <% } %>
         </div>
         <span class="p-2 font-bold text-green-700"> <a href="/">Home</a> >> <a href="/viewcourse/<%= course.id %>"><%= course.courseName %></a> >> <a href="/viewchapter/<%= chapter.id %>"><%= chapter.chapterName  %></a></span>
         <h2 class="text-center text-3xl m-5 font-bold text-green-600 underline"> PAGES </h2>
