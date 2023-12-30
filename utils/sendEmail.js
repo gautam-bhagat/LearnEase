@@ -32,7 +32,7 @@ const sendEmail = async (email,subject,body) =>{
 
         var info = await transporter.sendMail({
             from: senderEmail, // sender address
-            to: 'gautambhagat.business@gmail.com', // list of receivers
+            to: email, // list of receivers
             subject: subject, // Subject line
             text:  body
     });
