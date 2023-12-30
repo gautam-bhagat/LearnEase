@@ -11,6 +11,22 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Enroll.belongsTo(models.Page,{
+        foreignKey : "pageId"
+      })
+      Enroll.belongsTo(models.Chapter,{
+        foreignKey : "chapterId"
+      })
+      Enroll.belongsTo(models.Course,{
+        foreignKey : "courseId"
+      })
+      Enroll.belongsTo(models.Persona,{
+        foreignKey : "studentId"
+      })
+      Enroll.belongsTo(models.Persona,{
+        foreignKey : "teacherId"
+      })
+      
     }
   }
   Enroll.init({

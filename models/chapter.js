@@ -19,6 +19,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey : "chapterId"
       })
       
+      Chapter.hasMany(models.Enroll,{
+        foreignKey : "chapterId"
+      })
+      
     }
 
     static createChapter({ courseId, chapterName, chapterDescription }){

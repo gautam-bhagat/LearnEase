@@ -18,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
       Course.hasMany(models.Chapter, {
         foreignKey : "courseId"
       })
+      
+      Course.hasMany(models.Enroll, {
+        foreignKey : "courseId"
+      })
     }
 
     static createCourse({ teacherId , courseName,courseDescription }){

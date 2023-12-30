@@ -14,6 +14,12 @@ module.exports = (sequelize, DataTypes) => {
       Persona.hasMany(models.Course,{
         foreignKey : "teacherId"
       })
+      Persona.hasMany(models.Enroll,{
+        foreignKey : "teacherId"
+      })
+      Persona.hasMany(models.Enroll,{
+        foreignKey : "studentId"
+      })
     }
 
 

@@ -391,6 +391,40 @@ app.get(
 
 //API Requests
 
+app.get("/delete/:type/:typeid", connectEnsureLogin.ensureLoggedIn(),async (req,res)=>{
+  if(req.user.role==='teacher'){
+    let type = req.params.type
+    let typeid = parseInt(req.params.typeid)
+
+    if(type==='page'){
+      const page = await Page.findByPk(typeid)
+      await Page.destroy({where:{id:typeid}})
+      await Enroll.destroy({ where : { pageId : typeid } })
+      return res.redirect("/viewchapter/"+page.chapterId)
+    }
+
+    if(type==='chapter'){
+      const chapter = await Chapter.findByPk(typeid)
+      await Chapter.destroy({where:{id:typeid}})
+      await Page.destroy({where : {chapterId : typeid}})
+      await Enroll.destroy({ where : { chapterId : typeid } })
+      return res.redirect("/viewcourse/"+chapter.courseId)
+    }
+    
+    if(type==='course'){
+      const course = await Course.findByPk(typeid)
+      await Course.destroy({where : {id:typeid}})
+      await Chapter.destroy({where:{courseId:typeid}})
+      await Page.destroy({where : {courseId : typeid}})
+      await Enroll.destroy({ where : { courseId : typeid } })
+      return res.redirect("/home")
+    }
+  }
+
+  return res.redirect("/")
+
+})
+
 app.post("/enroll", async (req, res) => {
   let { studentId, teacherId, courseId, chapterId, pageId, completed } =
     req.body;

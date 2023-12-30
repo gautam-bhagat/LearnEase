@@ -15,6 +15,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey : "chapterId"
       })
 
+      Page.hasMany(models.Enroll,{
+        foreignKey : "pageId"
+      })
+
     }
   }
   Page.init({
