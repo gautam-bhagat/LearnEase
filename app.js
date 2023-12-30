@@ -53,8 +53,10 @@ passport.use(
     (username, password, done) => {
       Persona.findOne({ where: { email: username } })
         .then(async function (user) {
-          if(!user.verified){
-            return done(null, false, { message: "Verify your account through mail sent" });
+          if (!user.verified) {
+            return done(null, false, {
+              message: "Verify your account through mail sent",
+            });
           }
 
           const result = await bcrypt.compare(password, user.password);
@@ -136,12 +138,29 @@ app.post(
 );
 
 app.get("/home", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
-  console.log(req.user.role);
-  if (req.accepts("html")) {
-    if (req.user.role === "student") {
-      let courses = await Course.findAll();
+  // console.log(req.user.role);
+  try {
+    if (req.accepts("html")) {
+      if (req.user.role === "student") {
+        let courses = await Course.findAll();
+
+        let teachers = [];
+
+        return res.render("home", {
+          csrfToken: req.csrfToken(),
+          user: req.user,
+          courses,
+          teachers,
+        });
+      }
 
       let teachers = [];
+      const courses = await Course.findAll({
+        where: { teacherId: parseInt(req.user.id) },
+      });
+      courses.forEach(async (element) => {
+        teachers.push(req.user.firstName + " " + req.user.lastName);
+      });
 
       return res.render("home", {
         csrfToken: req.csrfToken(),
@@ -150,21 +169,8 @@ app.get("/home", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
         teachers,
       });
     }
-
-    let teachers = [];
-    const courses = await Course.findAll({
-      where: { teacherId: parseInt(req.user.id) },
-    });
-    courses.forEach(async (element) => {
-      teachers.push(req.user.firstName + " " + req.user.lastName);
-    });
-
-    res.render("home", {
-      csrfToken: req.csrfToken(),
-      user: req.user,
-      courses,
-      teachers,
-    });
+  } catch (error) {
+    return res.redirect("/");
   }
 });
 
@@ -281,7 +287,7 @@ app.get(
         if (course.teacherId !== req.user.id) {
           return res.redirect("/home");
         }
-        res.render("viewchapter", {
+        return res.render("viewchapter", {
           csrfToken: req.csrfToken(),
           user: req.user,
           chapter,
@@ -290,7 +296,7 @@ app.get(
         });
       }
     } catch (error) {
-      res.redirect("/home");
+      return res.redirect("/home");
     }
   }
 );
@@ -300,23 +306,27 @@ app.get(
   connectEnsureLogin.ensureLoggedIn(),
   async (req, res) => {
     if (req.user.role === "student") {
-      return res.redirect("/signup");
+      return res.redirect("/");
     }
     if (req.accepts("html")) {
-      // let chapterid = req.params.chapterid
-      const chapter = await Chapter.findOne({
-        where: { id: parseInt(req.params.chapterid) },
-      });
-      const pages = await Page.findAll({
-        where: { chapterId: parseInt(req.params.chapterid) },
-      });
-      console.log(pages);
-      res.render("addpage", {
-        csrfToken: req.csrfToken(),
-        user: req.user,
-        chapter,
-        pages,
-      });
+      try {
+        // let chapterid = req.params.chapterid
+        const chapter = await Chapter.findOne({
+          where: { id: parseInt(req.params.chapterid) },
+        });
+        const pages = await Page.findAll({
+          where: { chapterId: parseInt(req.params.chapterid) },
+        });
+        console.log(pages);
+        return res.render("addpage", {
+          csrfToken: req.csrfToken(),
+          user: req.user,
+          chapter,
+          pages,
+        });
+      } catch (error) {
+        return res.redirect("/");
+      }
     }
   }
 );
@@ -384,7 +394,7 @@ app.get(
           console.log("Error : Not yours");
           return res.redirect("/home");
         }
-        res.render("viewpage", {
+        return res.render("viewpage", {
           csrfToken: req.csrfToken(),
           user: req.user,
           page: allPages[index],
@@ -396,7 +406,7 @@ app.get(
       }
     } catch (error) {
       console.log("Error : ", error);
-      res.redirect("/home");
+      return res.redirect("/home");
     }
   }
 );
@@ -419,103 +429,110 @@ const getEnrolled = async (courses) => {
 
 app.get("/report", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   if (req.accepts("html")) {
-    if (req.user.role === "teacher") {
-      let courses = await Course.findAll({ teacherId: req.user.id });
-      let enrolled = await getEnrolled(courses);
-      console.log(enrolled);
+    try {
+      if (req.user.role === "teacher") {
+        let courses = await Course.findAll({ teacherId: req.user.id });
+        let enrolled = await getEnrolled(courses);
+        console.log(enrolled);
 
-      var items = Object.keys(enrolled).map(
-        (key) => { return [key, enrolled[key]] });
-      
-      items.sort(
-        (first, second) => { return first[1] - second[1] }
-      );
-
-      const popularCourseId = parseInt(items[items.length-1][0])
-      const popularCourse = await Course.findByPk(popularCourseId)
-        console.log(popularCourse)
-      return res.render("teachstats", {
-        csrfToken: req.csrfToken(),
-        user: req.user,
-        enrolled,
-        courses,popularCourse
-      });
-    }
-
-    if (req.user.role === "student") {
-      var totalPageDict = {};
-
-      const enrollCourses = await Enroll.findAll({
-        where: { studentId: req.user.id, pageId: -1 },
-      });
-      for (let e =0 ;e<enrollCourses.length; e++) {
-        let courseId = enrollCourses[e]["courseId"];
-        const chapters = await Chapter.findAll({
-          where: { courseId: courseId },
+        var items = Object.keys(enrolled).map((key) => {
+          return [key, enrolled[key]];
         });
-        console.log("Chapter Length " + chapters.length);
-        var totalPages = 0;
-            for (let i = 0; i < chapters.length; i++) {
-              const pages = await Page.findAll({
-                where: { chapterId: chapters[i].id },
-              });
-              let len = pages.length;
-              console.log("Length : ", len);
-              totalPages += len;
-            }
-        totalPageDict[courseId] = (totalPages);
+
+        items.sort((first, second) => {
+          return first[1] - second[1];
+        });
+
+        const popularCourseId = parseInt(items[items.length - 1][0]);
+        const popularCourse = await Course.findByPk(popularCourseId);
+        console.log(popularCourse);
+        return res.render("teachstats", {
+          csrfToken: req.csrfToken(),
+          user: req.user,
+          enrolled,
+          courses,
+          popularCourse,
+        });
       }
 
-      var completedPages = {}
-      for(let i=0;i<enrollCourses.length;i++){
-        let courseId = enrollCourses[i].courseId
-        const pages = await Enroll.findAll({where : { studentId : req.user.id, courseId : courseId,  }})
-        let len = pages.length;
-        completedPages[courseId] = (len-1)
+      if (req.user.role === "student") {
+        var totalPageDict = {};
+
+        const enrollCourses = await Enroll.findAll({
+          where: { studentId: req.user.id, pageId: -1 },
+        });
+        for (let e = 0; e < enrollCourses.length; e++) {
+          let courseId = enrollCourses[e]["courseId"];
+          const chapters = await Chapter.findAll({
+            where: { courseId: courseId },
+          });
+          console.log("Chapter Length " + chapters.length);
+          var totalPages = 0;
+          for (let i = 0; i < chapters.length; i++) {
+            const pages = await Page.findAll({
+              where: { chapterId: chapters[i].id },
+            });
+            let len = pages.length;
+            console.log("Length : ", len);
+            totalPages += len;
+          }
+          totalPageDict[courseId] = totalPages;
+        }
+
+        var completedPages = {};
+        for (let i = 0; i < enrollCourses.length; i++) {
+          let courseId = enrollCourses[i].courseId;
+          const pages = await Enroll.findAll({
+            where: { studentId: req.user.id, courseId: courseId },
+          });
+          let len = pages.length;
+          completedPages[courseId] = len - 1;
+        }
+
+        console.log("Hello Total ", totalPageDict);
+        console.log("Hello Completed ", completedPages);
+        let existing = enrollCourses.filter((item) => {
+          return totalPageDict[item.courseId] > 0;
+        });
+
+        let courses = [];
+        for (let i = 0; i < existing.length; i++) {
+          const cour = await Course.findByPk(existing[i].courseId);
+          // console.log(cour)
+          courses.push(cour);
+        }
+
+        console.log(courses[0].courseName);
+        return res.render("stustats", {
+          csrfToken: req.csrfToken(),
+          user: req.user,
+          courses,
+          completedPages,
+          totalPageDict,
+        });
       }
-
-      console.log("Hello Total ",totalPageDict);
-      console.log("Hello Completed ",completedPages);
-      let existing = enrollCourses.filter((item)=>{
-        return totalPageDict[item.courseId] > 0
-      })
-
-      let courses = []
-      for (let i =0;i<existing.length;i++){
-        const cour = await Course.findByPk(existing[i].courseId)
-        // console.log(cour)
-        courses.push(cour)
-      }
-
-      console.log(courses[0].courseName)
-      res.render("stustats", {
-        csrfToken: req.csrfToken(),
-        user: req.user,
-        courses,
-        completedPages,totalPageDict
-      });
+    } catch (error) {
+      return res.redirect("/");
     }
   }
 });
 
 //API Requests
 
-app.get("/verify/:id",async (req,res)=>{
+app.get("/verify/:id", async (req, res) => {
   try {
-    const id = parseInt(req.params.id)
-    const person = await Persona.findByPk(id)
-    if(person.verified){
-      
-      return res.redirect("/login")
+    const id = parseInt(req.params.id);
+    const person = await Persona.findByPk(id);
+    if (person.verified) {
+      return res.redirect("/login");
     }
 
-    await Persona.update({verified :true},{ where : {id:id}})
-    return res.send("Email Verified")
+    await Persona.update({ verified: true }, { where: { id: id } });
+    return res.send("Email Verified");
   } catch (error) {
-    res.send("invalid link")
+    res.send("invalid link");
   }
-})
-
+});
 
 app.get(
   "/delete/:type/:typeid",
@@ -557,8 +574,8 @@ app.get(
           await Chapter.destroy({ where: { courseId: typeid } });
           await Page.destroy({ where: { courseId: typeid } });
           await Enroll.destroy({ where: { courseId: course.id } });
-          const t = Enroll.findAll({where : { courseId : typeid}})
-          console.log(t)
+          const t = Enroll.findAll({ where: { courseId: typeid } });
+          console.log(t);
           return res.redirect("/home");
         } catch (error) {
           console.log(error);
@@ -722,12 +739,12 @@ app.post("/personas", async (req, res) => {
     });
     console.log(person);
 
-    const base_url = req.protocol+"://"+req.headers.host
-    const verify_url = base_url+"/verify/"+person.id
-    sendEmail(person.email,"Verify your account",verify_url)
+    const base_url = req.protocol + "://" + req.headers.host;
+    const verify_url = base_url + "/verify/" + person.id;
+    sendEmail(person.email, "Verify your account", verify_url);
     req.flash("error", "Verify your account through mail sent");
-    return res.redirect("/login")
-  
+    return res.redirect("/login");
+
     // req.login(person, (err) => {
     //   if (err) {
     //     console.log(err);
