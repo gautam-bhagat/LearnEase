@@ -25,6 +25,7 @@ app.use(flash());
 app.set("view engine", "ejs");
 
 const path = require("path");
+const sendEmail = require("./utils/sendEmail");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -52,6 +53,10 @@ passport.use(
     (username, password, done) => {
       Persona.findOne({ where: { email: username } })
         .then(async function (user) {
+          if(!user.verified){
+            return done(null, false, { message: "Verify your account through mail sent" });
+          }
+
           const result = await bcrypt.compare(password, user.password);
           if (result) {
             // console.log("Loggedd In", user);
@@ -418,11 +423,22 @@ app.get("/report", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
       let courses = await Course.findAll({ teacherId: req.user.id });
       let enrolled = await getEnrolled(courses);
       console.log(enrolled);
+
+      var items = Object.keys(enrolled).map(
+        (key) => { return [key, enrolled[key]] });
+      
+      items.sort(
+        (first, second) => { return first[1] - second[1] }
+      );
+
+      const popularCourseId = parseInt(items[items.length-1][0])
+      const popularCourse = await Course.findByPk(popularCourseId)
+        console.log(popularCourse)
       return res.render("teachstats", {
         csrfToken: req.csrfToken(),
         user: req.user,
         enrolled,
-        courses,
+        courses,popularCourse
       });
     }
 
@@ -467,7 +483,7 @@ app.get("/report", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
       let courses = []
       for (let i =0;i<existing.length;i++){
         const cour = await Course.findByPk(existing[i].courseId)
-        console.log(cour)
+        // console.log(cour)
         courses.push(cour)
       }
 
@@ -483,6 +499,23 @@ app.get("/report", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
 });
 
 //API Requests
+
+app.get("/verify/:id",async (req,res)=>{
+  try {
+    const id = parseInt(req.params.id)
+    const person = await Persona.findByPk(id)
+    if(person.verified){
+      
+      return res.redirect("/login")
+    }
+
+    await Persona.update({verified :true},{ where : {id:id}})
+    return res.send("Email Verified")
+  } catch (error) {
+    res.send("invalid link")
+  }
+})
+
 
 app.get(
   "/delete/:type/:typeid",
@@ -689,21 +722,25 @@ app.post("/personas", async (req, res) => {
     });
     console.log(person);
 
-    req.login(person, (err) => {
-      if (err) {
-        console.log(err);
-      }
+    const base_url = req.protocol+"://"+req.headers.host
+    const verify_url = base_url+"/verify/"+person.id
+    sendEmail(person.email,"Verify your account",verify_url)
+    req.flash("error", "Verify your account through mail sent");
+    return res.redirect("/login")
+  
+    // req.login(person, (err) => {
+    //   if (err) {
+    //     console.log(err);
+    //   }
 
-      // Redirect based on the user's role
-      if (person.role === "teacher") {
-        res.redirect("/home");
-      } else if (person.role === "student") {
-        res.redirect("/home");
-      } else {
-        // Handle other roles or scenarios as needed
-        res.redirect("/signup");
-      }
-    });
+    //   if (person.role === "teacher") {
+    //     res.redirect("/home");
+    //   } else if (person.role === "student") {
+    //     res.redirect("/home");
+    //   } else {
+    //     res.redirect("/signup");
+    //   }
+    // });
   } catch (error) {
     console.log(error);
     res.redirect("/home");
