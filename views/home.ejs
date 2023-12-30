@@ -8,26 +8,31 @@
 
     <div class="w-full flex justify-center">
       <div class="w-5/6">
-        <div class="flex m-5 justify-start">
-          <button data-modal-target="add-course-modal" data-modal-toggle="add-course-modal" class="p-3 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Course</button>
+        <% if(user.role == 'teacher'){ %>
 
-          <a
-            class="p-3 text-white font-normal bg-purple-700 rounded mr-5"
-            href="#your-courses"
-            >View Courses</a
-          >
-          <a class="p-3 text-white font-normal bg-sky-600 rounded mr-5" href="/home"
-            >Report</a
-          >
-        </div>
+          <div class="flex m-5 justify-start">
+            <button data-modal-target="add-course-modal" data-modal-toggle="add-course-modal" class="p-3 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Course</button>
+  
+            <a
+              class="p-3 text-white font-normal bg-purple-700 rounded mr-5"
+              href="#your-courses"
+              >View Courses</a
+            >
+            <a class="p-3 text-white font-normal bg-sky-600 rounded mr-5" href="/home"
+              >Report</a
+            >
+          </div>
+        <% } %>
         <span class="font-bold text-green-700"> <a href="/">Home >></a> </span>
-       <h2 class="text-center text-3xl m-5 font-bold">Your Courses</h2>
+       <h2 class="text-center text-3xl m-5 font-bold">Courses</h2>
+       
         <div id="your-courses" class="w-full p-2 grid grid-cols-3 gap-3">
           <% for(let i=0; i< courses.length ; i++) { %> 
+            
             <div class="p-5 border  rounded"> 
               <h2 class="font-bold"><%= courses[i].courseName %></h2>
               <p class="p-1"><%= courses[i].courseDescription.length > 150 ? courses[i].courseDescription.substring(0,150)+"...." : courses[i].courseDescription %></p>
-              <h4 class="font-bold text-right"><%= user.firstName +" "+user.lastName %></h4>
+              <h4 class="font-bold text-right"><%= teachers[i] %></h4>
               <a href="/viewcourse/<%= courses[i].id %>" class="w-full p-2 text-white font-normal rounded mt-6 bg-green-700"> View Course</a>
             </div>
           <% } %>

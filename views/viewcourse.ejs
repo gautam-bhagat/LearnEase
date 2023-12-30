@@ -14,9 +14,24 @@
          <div>
           <h2 class="text-xl "> <b><%= course.courseName %></b></h2>
           <p class="font-sm text-justify px-2 "><%= course.courseDescription %></p>
-          <h2 class="text-xl ">Educator : <b><%= user.firstName + " "+user.lastName %></b></h2>
+          <h2 class="text-xl ">Educator : <b><%= user.role=='teacher' ? user.firstName + " "+user.lastName : teacher.firstName + " "+teacher.lastName %></b></h2>
          </div>
-         <button data-modal-target="add-chapter-modal" data-modal-toggle="add-chapter-modal" class="px-5 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Chapter</button>
+         <% if(user.role=='teacher'){ %>
+          <button data-modal-target="add-chapter-modal" data-modal-toggle="add-chapter-modal" class="px-5 py-5 text-white font-normal bg-green-600 rounded mr-5"  type="button"  >Add Chapter</button>
+         <% } %>
+        <% if(user.role=='student'){ %>
+            <form action="/enroll" method="post">
+
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="studentId" value="<%= user.id %>">
+              <input type="hidden" name="teacherId" value="<%= teacher.id %>">
+              <input type="hidden" name="courseId" value="<%= course.id %>">
+              <input type="hidden" name="chapterId" value="-1">
+              <input type="hidden" name="pageId" value="-1">
+              <input type="hidden" name="completed" value="true">
+              <button class="px-5 text-white font-normal bg-green-700 rounded py-5  "  type="submit"  <%= enrolled ? "disabled" : "" %> ><%= enrolled ? "Enrolled" : "Enroll" %></button>
+            </form>
+        <% } %>
 
         </div>
         
@@ -24,13 +39,26 @@
         <h2 class="text-center text-3xl m-5 font-bold text-green-600 underline"> CHAPTERS </h2>
         <div class="w-full p-2 grid grid-cols-3 gap-1">
         <%  for(let i = 0; i < chapters.length ; i++) { %>
-         <a href="/viewchapter/<%= chapters[i].id %>">
-          <div class="p-3  border rounded my-2">
-            <div class="font-bold  p-1"> <%= `${i+1}. ${chapters[i].chapterName} ` %> </div>
-            <p class="mx-2"> <%= ` ${chapters[i].chapterDescription} ` %> </p>
-           </div>
-
-         </a>
+         <% if(user.role == 'student') { %>
+          <% if(enrolled){ %>
+            <a href="/viewchapter/<%= chapters[i].id %>">
+              <% }else{ %>
+            <a href="#">
+              <% } %>
+            <div class="p-3  border rounded my-2">
+              <div class="font-bold  p-1"> <%= `${i+1}. ${chapters[i].chapterName} ` %> </div>
+              <p class="mx-2"> <%= ` ${chapters[i].chapterDescription} ` %> </p>
+             </div>
+           </a>
+          <% } else { %>
+            <a href="/viewchapter/<%= chapters[i].id %>">
+              <div class="p-3  border rounded my-2">
+                <div class="font-bold  p-1"> <%= `${i+1}. ${chapters[i].chapterName} ` %> </div>
+                <p class="mx-2"> <%= ` ${chapters[i].chapterDescription} ` %> </p>
+               </div>
+    
+             </a>
+          <% } %>
         <% } %>
         </div>
       </div>
