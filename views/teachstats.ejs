@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <%- include('headtag.ejs') %>
+  </head>
+  <body class="w-full justify-self-center flex flex-col">
+    <%- include('pvtheader.ejs') %>
+
+    <div class="w-full flex justify-center">
+      <div class="w-5/6">
+       
+        <span class="font-bold text-green-700"> <a href="/">Home </a> >> <a href="#">Report</a></span>
+       <h2 class="text-center text-3xl m-5 font-bold">Courses</h2>
+       
+        <div id="your-courses" class="w-full p-2 grid grid-cols-3 gap-3">
+          <% for(let i=0; i< courses.length ; i++) { %> 
+            
+            <div class="p-5 border  rounded"> 
+              <h2 class="font-bold"><%= courses[i].courseName %></h2>
+              <p class="p-1"><%= courses[i].courseDescription.length > 150 ? courses[i].courseDescription.substring(0,150)+"...." : courses[i].courseDescription %></p>
+              
+              <div class=" flex items-center justify-between">
+                
+                <span class="font-bold text-xl"> <i class='bx font-bold  bxs-group'></i> <%= enrolled[courses[i].id] %></span>
+              </div>
+            </div>
+          <% } %>
+        </div>
+        
+
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+  </body>
+</html>

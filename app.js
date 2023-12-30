@@ -258,7 +258,7 @@ app.get(
           });
         }
       } catch (error) {
-        return res.redirect("/home")
+        return res.redirect("/home");
       }
     }
     try {
@@ -333,11 +333,17 @@ app.get(
         const course = await Course.findOne({
           where: { id: chapter.courseId },
         });
-        
-        let completed = false
-        const checkCompleted =  await Enroll.findOne({where : {studentId: req.user.id, chapterId:chapter.id,pageId: allPages[index].id}})
-        if(checkCompleted){
-          completed=true
+
+        let completed = false;
+        const checkCompleted = await Enroll.findOne({
+          where: {
+            studentId: req.user.id,
+            chapterId: chapter.id,
+            pageId: allPages[index].id,
+          },
+        });
+        if (checkCompleted) {
+          completed = true;
         }
 
         return res.render("viewpage", {
@@ -347,11 +353,12 @@ app.get(
           chapter,
           course,
           pageIndex: index,
-          allPages,completed
+          allPages,
+          completed,
         });
       } catch (error) {
-        console.log(error)
-        return res.redirect("/home")
+        console.log(error);
+        return res.redirect("/home");
       }
     }
 
@@ -389,41 +396,147 @@ app.get(
   }
 );
 
-//API Requests
+const getEnrolled = async (courses) => {
+  let enrolled = [];
+  var dict = {};
+  for (i = 0; i < courses.length; i++) {
+    let enrols = await Enroll.findAll({
+      where: { courseId: courses[i].id, pageId: -1 },
+    });
+    let courseId = courses[i].id;
 
-app.get("/delete/:type/:typeid", connectEnsureLogin.ensureLoggedIn(),async (req,res)=>{
-  if(req.user.role==='teacher'){
-    let type = req.params.type
-    let typeid = parseInt(req.params.typeid)
-
-    if(type==='page'){
-      const page = await Page.findByPk(typeid)
-      await Page.destroy({where:{id:typeid}})
-      await Enroll.destroy({ where : { pageId : typeid } })
-      return res.redirect("/viewchapter/"+page.chapterId)
-    }
-
-    if(type==='chapter'){
-      const chapter = await Chapter.findByPk(typeid)
-      await Chapter.destroy({where:{id:typeid}})
-      await Page.destroy({where : {chapterId : typeid}})
-      await Enroll.destroy({ where : { chapterId : typeid } })
-      return res.redirect("/viewcourse/"+chapter.courseId)
-    }
-    
-    if(type==='course'){
-      const course = await Course.findByPk(typeid)
-      await Course.destroy({where : {id:typeid}})
-      await Chapter.destroy({where:{courseId:typeid}})
-      await Page.destroy({where : {courseId : typeid}})
-      await Enroll.destroy({ where : { courseId : typeid } })
-      return res.redirect("/home")
-    }
+    dict[courseId] = enrols.length;
+    enrolled.push(dict);
   }
 
-  return res.redirect("/")
+  return dict;
+};
 
-})
+app.get("/report", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  if (req.accepts("html")) {
+    if (req.user.role === "teacher") {
+      let courses = await Course.findAll({ teacherId: req.user.id });
+      let enrolled = await getEnrolled(courses);
+      console.log(enrolled);
+      return res.render("teachstats", {
+        csrfToken: req.csrfToken(),
+        user: req.user,
+        enrolled,
+        courses,
+      });
+    }
+
+    if (req.user.role === "student") {
+      var totalPageDict = {};
+
+      const enrollCourses = await Enroll.findAll({
+        where: { studentId: req.user.id, pageId: -1 },
+      });
+      for (let e =0 ;e<enrollCourses.length; e++) {
+        let courseId = enrollCourses[e]["courseId"];
+        const chapters = await Chapter.findAll({
+          where: { courseId: courseId },
+        });
+        console.log("Chapter Length " + chapters.length);
+        var totalPages = 0;
+            for (let i = 0; i < chapters.length; i++) {
+              const pages = await Page.findAll({
+                where: { chapterId: chapters[i].id },
+              });
+              let len = pages.length;
+              console.log("Length : ", len);
+              totalPages += len;
+            }
+        totalPageDict[courseId] = (totalPages);
+      }
+
+      var completedPages = {}
+      for(let i=0;i<enrollCourses.length;i++){
+        let courseId = enrollCourses[i].courseId
+        const pages = await Enroll.findAll({where : { studentId : req.user.id, courseId : courseId,  }})
+        let len = pages.length;
+        completedPages[courseId] = (len-1)
+      }
+
+      console.log("Hello Total ",totalPageDict);
+      console.log("Hello Completed ",completedPages);
+      let existing = enrollCourses.filter((item)=>{
+        return totalPageDict[item.courseId] > 0
+      })
+
+      let courses = []
+      for (let i =0;i<existing.length;i++){
+        const cour = await Course.findByPk(existing[i].courseId)
+        console.log(cour)
+        courses.push(cour)
+      }
+
+      console.log(courses[0].courseName)
+      res.render("stustats", {
+        csrfToken: req.csrfToken(),
+        user: req.user,
+        courses,
+        completedPages,totalPageDict
+      });
+    }
+  }
+});
+
+//API Requests
+
+app.get(
+  "/delete/:type/:typeid",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    if (req.user.role === "teacher") {
+      let type = req.params.type;
+      let typeid = parseInt(req.params.typeid);
+
+      if (type === "page") {
+        const page = await Page.findByPk(typeid);
+        try {
+          await Page.destroy({ where: { id: typeid } });
+          await Enroll.destroy({ where: { pageId: typeid } });
+          return res.redirect("/viewchapter/" + page.chapterId);
+        } catch (error) {
+          console.log(error);
+          return res.redirect("/viewchapter/" + page.chapterId);
+        }
+      }
+
+      if (type === "chapter") {
+        const chapter = await Chapter.findByPk(typeid);
+        try {
+          await Chapter.destroy({ where: { id: typeid } });
+          await Page.destroy({ where: { chapterId: typeid } });
+          await Enroll.destroy({ where: { chapterId: typeid } });
+          return res.redirect("/viewcourse/" + chapter.courseId);
+        } catch (error) {
+          console.log(error);
+          return res.redirect(`/viewcourse/${chapter.courseId}`);
+        }
+      }
+
+      if (type === "course") {
+        try {
+          const course = await Course.findByPk(typeid);
+          await Course.destroy({ where: { id: typeid } });
+          await Chapter.destroy({ where: { courseId: typeid } });
+          await Page.destroy({ where: { courseId: typeid } });
+          await Enroll.destroy({ where: { courseId: course.id } });
+          const t = Enroll.findAll({where : { courseId : typeid}})
+          console.log(t)
+          return res.redirect("/home");
+        } catch (error) {
+          console.log(error);
+          return res.redirect("/");
+        }
+      }
+    }
+
+    return res.redirect("/");
+  }
+);
 
 app.post("/enroll", async (req, res) => {
   let { studentId, teacherId, courseId, chapterId, pageId, completed } =
@@ -446,10 +559,16 @@ app.post("/enroll", async (req, res) => {
   }
 });
 
-
 app.post("/markpage", async (req, res) => {
-  let { pageIndex,studentId, teacherId, courseId, chapterId, pageId, completed } =
-    req.body;
+  let {
+    pageIndex,
+    studentId,
+    teacherId,
+    courseId,
+    chapterId,
+    pageId,
+    completed,
+  } = req.body;
   console.log(req.body);
   try {
     const pg = await Enroll.create({
@@ -467,7 +586,6 @@ app.post("/markpage", async (req, res) => {
     return res.redirect(`/viewcourse/${courseId}`);
   }
 });
-
 
 app.post("/addpage", async (req, res) => {
   let { chapterId, title, content } = req.body;

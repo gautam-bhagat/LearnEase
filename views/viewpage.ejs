@@ -7,10 +7,10 @@
 
     <script>
         const next = ()=>{
-            window.location.href = "/viewpage/<%= course.id %>/<%= parseInt(pageIndex)+1 %>"
+            window.location.href = "/viewpage/<%= chapter.id %>/<%= parseInt(pageIndex)+1 %>"
         }
         const prev = ()=>{
-            window.location.href = "/viewpage/<%= course.id %>/<%= parseInt(pageIndex)-1 %>"
+            window.location.href = "/viewpage/<%= chapter.id %>/<%= parseInt(pageIndex)-1 %>"
         }
     </script>
   </head>
