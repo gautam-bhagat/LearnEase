@@ -8,7 +8,7 @@ LearnEase is a Learning Management System made for the fullfilment of WD201 Cour
 -   Features include personalized dashboards, progress tracking, multimedia support, and a flexible learning environment adaptable to various subjects and learning styles.
 -   Join LearnEase today to revolutionize the way you learn and teach. Experience education made simpler, more engaging, and accessible for everyone.
 
-### Video Demo Link : [Link](https://www.loom.com/share/3b414282e1404ad4b05a006ec0b05ad9?sid=f622eb7b-d023-401d-8c34-0d074d601122)
+### Video Demo Link : [Link](https://www.loom.com/share/c77114929e4643cdb9dbbd91cc87f6bd?sid=e41839b8-874f-417b-af68-83ff2eafccdb)
 
 ### Live Application : [Link](https://learnease-gb.onrender.com/)
 
