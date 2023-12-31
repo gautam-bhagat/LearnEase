@@ -27,7 +27,7 @@ const sendEmail = async (email,subject,body) =>{
         // console.log(transporter.options.host)
         transporter.verify((err, success) => {
             if (err) console.error(err);
-            console.log('Your config is correct');
+            // console.log('Your config is correct');
         });
 
         var info = await transporter.sendMail({

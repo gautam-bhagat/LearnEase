@@ -15,17 +15,18 @@ const extractCSRF = (res) => {
 const login = async (agent, username, password) => {
   let res = await agent.get("/login");
   let csrfToken = extractCSRF(res);
-  res = await agent.post("/session").send({
+  res = await agent.post("/login").send({
     email: username,
     password: password,
     _csrf: csrfToken,
   });
 };
 
-const firstName = "firstName";
-const lastName = "lastName";
-const email = "e@1.co";
-const password = "12345678";
+const firstName = "John";
+const lastName = "Doe";
+const email = "verify.quickjot@gmail.com";
+const password = "1234567890";
+const role = "teacher";
 
 describe("Test Suite", () => {
   beforeAll(async () => {
@@ -39,25 +40,49 @@ describe("Test Suite", () => {
     server.close();
   });
 
-  test("Create Todo", () => {
-    expect(true).toBe(true);
+  // test("Create Todo", () => {
+  //   expect(true).toBe(true);
+  // });
+
+  test("Redirecting to unauthorized users",async ()=>{
+
+    const res = await request(app).get("/home")
+    expect(res.status).toBe(302)
+
+  })
+
+  test("Signup", async () => {
+    const r = await agent.get("/signup");
+    csrfToken = extractCSRF(r);
+
+    const res = await agent.post("/personas").send({
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      password: password,
+      role : role,
+      _csrf: csrfToken,
+    });
+
+    expect(res.statusCode).toBe(302);
+  });
+  
+  test("Verify Email", async () => {
+    const r = await agent.get("/verify/1");
+    expect(r.statusCode).toBe(200);
   });
 
-//   test("Signup", async () => {
-//     const r = await agent.get("/signup");
-//     csrfToken = extractCSRF(r);
+  test("SignIn", async () => {
+    await login(agent, email, password);
+  });
 
-//     const res = await agent.post("/users").send({
-//       firstName: firstName,
-//       lastName: lastName,
-//       email: email,
-//       password: password,
-//       _csrf: csrfToken,
-//     });
 
-//     expect(res.statusCode).toBe(302);
-//   });
+  test("Go to Home Page if logged in", async () => {
+    await login(agent, email, password);
 
+    const response = await agent.get("/home");
+    expect(response.statusCode).toBe(200);
+  });
 //   test("Create Todo", async () => {
 //     const agent = request.agent(server);
 //     await login(agent, email, password);
