@@ -17,19 +17,22 @@
           <% for(let i=0; i< courses.length ; i++) { %> 
             
             <div class="p-5 border  rounded"> 
+              <% const percent = Math.floor((completedPages[courses[i].id]/totalPageDict[courses[i].id])*100) %>
               <h2 class="font-bold"><%= courses[i].courseName %></h2>
               <p class="p-1"><%= courses[i].courseDescription.length > 150 ? courses[i].courseDescription.substring(0,150)+"...." : courses[i].courseDescription %></p>
               
               <div class=" flex items-center justify-between">
+              
                 <a href="/viewcourse/<%= courses[i].id %>" class=" p-2 text-white font-normal rounded mt-6 bg-green-700"> View Course</a>
-            
+                
                 <div class="w-3/4">
+                  
                     <div class="flex justify-between mb-1">
                         <span class="text-base font-medium text-black-700 dark:text-black">Progress</span>
-                        <span class="text-sm font-medium text-black-700 dark:text-black"><%= Math.floor((completedPages[courses[i].id]/totalPageDict[courses[i].id])*100) %>%</span>
+                        <span class="text-sm font-medium text-black-700 dark:text-black"><%= percent %>%</span>
                     </div>
                     <div class="w-full bg-gray-100 border rounded-full h-2.5 dark:bg-white-700">
-                        <div class="bg-green-600 h-2.5 rounded-full" style="width: <%= Math.floor((completedPages[courses[i].id]/totalPageDict[courses[i].id])*100) %>%"></div>
+                        <div class="bg-green-600 h-2.5 rounded-full" style="width: <%= percent %>%"></div>
                     </div>
                 </div>
 

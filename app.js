@@ -15,7 +15,7 @@ const LocalStrategy = require("passport-local");
 const csrf = require("csurf");
 const bcrypt = require("bcrypt");
 const flash = require("connect-flash");
-let alert = require('alert'); 
+// let alert = require("alert");
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser("Secret_Token"));
@@ -518,24 +518,96 @@ app.get("/report", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
 });
 
 //API Requests
+// var pdf = require("pdf-creator-node");
+// var fs = require('fs')
 
-app.post("/changepass",async (req,res)=>{
+// const {jsPDF} = require('jspdf');
+
+// function generatePDFfromHTML(htmlContent, outputPath) {
+//   const doc = new jsPDF('p');
+//   doc.text(htmlContent, 10, 10);
+//   doc.save(outputPath);
+//   console.log('PDF generated successfully');
+// }
+
+// app.post(
+//   "/certificate",
+//   connectEnsureLogin.ensureLoggedIn(),
+//   async (req, res) => {
+//     try {
+//       let { courseId } = req.body;
+//       console.log("course : ", courseId);
+//       let course = await Course.findByPk(courseId);
+//       let person = await Persona.findByPk(course.teacherId);
+//       const teacherName = person.firstName + " " + person.lastName;
+//       const studentName = req.user.firstName + " " + req.user.lastName;
+//       const courseName = course.courseName;
+//       // console.log({ teacherName, studentName, courseName });
+
+//       var html = fs.readFileSync('./certificate.html','utf8')
+
+//       let mapObj = {
+//         "{{teacherName}}": teacherName,"{{studentName}}":studentName,"{{courseName}}":courseName
+//       }
+//       html = html.replace(/{{teacherName}}|{{studentName}}|{{courseName}}/gi,(matched)=>{ return mapObj[matched]})
+//       console.log(html)
+      
+//       generatePDFfromHTML(html, './custom.pdf');
+//       // var document = {
+//       //   html: html,
+//       //   path: "./output.pdf",
+//       //   type: "",
+//       // };
+//       // var options = {
+//       //   format: "A4",
+//       //   orientation: "portrait",
+//       //   border: "10mm",
+//       //   header: {
+//       //       height: "45mm",
+//       //       contents: '<div style="text-align: center;">Author: Shyam Hajare</div>'
+//       //   },
+//       //   footer: {
+//       //       height: "28mm",
+//       //       contents: {
+//       //           first: 'Cover page',
+//       //           2: 'Second page', // Any page number is working. 1-based index
+//       //           default: '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', // fallback value
+//       //           last: 'Last Page'
+//       //       }
+//       //   }}
+//       // pdf
+//       //   .create(document, options)
+//       //   .then((res) => {
+//       //     console.log(res);
+//       //   })
+//       //   .catch((error) => {
+//       //     console.error(error);
+//       //   });
+
+//       return res.redirect("/report");
+//     } catch (error) {
+//       console.log(error);
+//       return res.redirect("/report");
+//     }
+//   }
+// );
+
+app.post("/changepass", async (req, res) => {
   try {
-    const {userId,newpass,cnewpass} = req.body
-    if(newpass===cnewpass){
-      const password = encryptPassword(newpass)
-      await Persona.update({password : password},{where : { id:userId }})
-      req.flash("error","Password Changed!")
-      return res.redirect("/")
+    const { userId, newpass, cnewpass } = req.body;
+    if (newpass === cnewpass) {
+      const password = encryptPassword(newpass);
+      await Persona.update({ password: password }, { where: { id: userId } });
+      req.flash("error", "Password Changed!");
+      return res.redirect("/");
     }
-    req.flash("error","Password doesnt match")
-    return res.redirect("/")
+    req.flash("error", "Password doesnt match");
+    return res.redirect("/");
   } catch (error) {
-    req.flash("error","Error Occurred! Couldn't change password")
-    return res.redirect("/")
+    req.flash("error", "Error Occurred! Couldn't change password");
+    return res.redirect("/");
   }
-})
-
+});
 
 app.get("/verify/:id", async (req, res) => {
   try {

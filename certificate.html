@@ -1,0 +1,76 @@
+<html>
+    <head>
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,700;1,800;1,900&family=Sacramento&display=swap" rel="stylesheet">
+        <style type='text/css'>
+
+            body, html {
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                color: black;
+                display: table;
+              font-family: 'Sacramento', cursive;
+
+                font-size: 40px;
+                text-align: center;
+            }
+            .container {
+                border: 20px solid #04aa6d;
+                width: 750px;
+                height: 563px;
+                display: table-cell;
+                vertical-align: middle;
+            }
+            .logo {
+                color: #000000;
+            }
+
+            .marquee {
+                color: #04aa6d;
+                font-size: 48px;
+                margin: 20px;
+            }
+            .assignment {
+                margin: 20px;
+            }
+            .person {
+                border-bottom: 2px solid black;
+                font-size: 32px;
+                font-style: italic;
+                margin: 20px auto;
+                width: 400px;
+            }
+            .reason {
+                margin: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="logo">
+                <b>LearnEase : Learning Management System</b>
+            </div>
+
+            <div class="marquee">
+                Certificate of Completion
+            </div>
+
+            <div class="assignment">
+                This certificate is presented to
+            </div>
+
+            <div class="person">
+               {{studentName}}
+            </div>
+
+            <div class="reason">
+                For completing<br/>
+                <b><i>{{courseName}}</i></b> by <br/>
+{{teacherName}}
+            </div>
+        </div>
+    </body>
+</html>
