@@ -15,7 +15,7 @@ const LocalStrategy = require("passport-local");
 const csrf = require("csurf");
 const bcrypt = require("bcrypt");
 const flash = require("connect-flash");
-
+let alert = require('alert'); 
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser("Secret_Token"));
@@ -518,6 +518,24 @@ app.get("/report", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
 });
 
 //API Requests
+
+app.post("/changepass",async (req,res)=>{
+  try {
+    const {userId,newpass,cnewpass} = req.body
+    if(newpass===cnewpass){
+      const password = encryptPassword(newpass)
+      await Persona.update({password : password},{where : { id:userId }})
+      req.flash("error","Password Changed!")
+      return res.redirect("/")
+    }
+    req.flash("error","Password doesnt match")
+    return res.redirect("/")
+  } catch (error) {
+    req.flash("error","Error Occurred! Couldn't change password")
+    return res.redirect("/")
+  }
+})
+
 
 app.get("/verify/:id", async (req, res) => {
   try {
