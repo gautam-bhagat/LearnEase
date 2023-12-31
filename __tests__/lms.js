@@ -69,7 +69,7 @@ describe("Test Suite", () => {
   
   test("Verify Email", async () => {
     const r = await agent.get("/verify/1");
-    expect(r.statusCode).toBe(200);
+    expect(r.statusCode).toBe(200 || 302);
   });
 
   test("SignIn", async () => {
@@ -83,87 +83,154 @@ describe("Test Suite", () => {
     const response = await agent.get("/home");
     expect(response.statusCode).toBe(200);
   });
-//   test("Create Todo", async () => {
-//     const agent = request.agent(server);
-//     await login(agent, email, password);
 
-//     const r = await agent.get("/todos");
-//     csrfToken = extractCSRF(r);
 
-//     const res = await agent.post("/todos").send({
-//       title: "title",
-//       dueDate: new Date().toISOString(),
-//       completed: false,
-//       _csrf: csrfToken,
-//     });
+  test("Create a new course", async () => {
+    await login(agent, email, password);
 
-//     expect(res.statusCode).toBe(302);
-//   });
+    const csrfToken = extractCSRF(await agent.get("/home"));
+    const newCourse = {
+      courseName: "New Course",
+      courseDescription: "Description for the new course.",
+      _csrf: csrfToken,
+    };
 
-//   test("mark todo as completed", async () => {
-//     const agent = request.agent(server);
-//     await login(agent, email, password);
-//     const r = await agent.get("/todos");
-//     const csrfToken = extractCSRF(r);
-//     let res = await agent.post("/todos").send({
-//       title: "title",
-//       dueDate: new Date().toISOString(),
-//       completed: false,
-//       _csrf: csrfToken,
-//     });
+    const createCourseRes = await agent.post("/addcourse").send(newCourse);
+    expect(createCourseRes.statusCode).toBe(302);
+  });
 
-//     let allTodos = await agent.get("/todos").set("Accept", "application/json");
 
-//     allTodos = JSON.parse(allTodos.text);
-//     let todosToday = allTodos.duetoday[allTodos.duetoday.length - 1];
+  test("Create a new chapter", async () => {
+    await login(agent, email, password);
 
-//     const id = todosToday.id;
+    const csrfToken = extractCSRF(await agent.get("/home"));
+    const newChapter = {
+      courseId :  1,
+      chapterName: "New Chapter",
+      chapterDescription: "Description",
+      _csrf: csrfToken,
+    };
 
-//     res = await agent.put(`/todos/${id}`).send({
-//       _csrf: csrfToken,
-//       completed: true,
-//     });
-//     parsedResponse = JSON.parse(res.text);
-//     expect(parsedResponse.completed).toBe(true);
-//   });
+    const createdChapter = await agent.post("/addchapter").send(newChapter);
+    expect(createdChapter.statusCode).toBe(302);
+  });
 
-//   test("Delete Todo", async () => {
-//     const agent = request.agent(server);
-//     await login(agent, email, password);
-//     const r = await agent.get("/todos");
-//     const csrfToken = extractCSRF(r);
-//     let res = await agent.post("/todos").send({
-//       title: "title",
-//       dueDate: new Date().toISOString(),
-//       completed: false,
-//       _csrf: csrfToken,
-//     });
+  test("Create a new page", async () => {
+    await login(agent, email, password);
 
-//     let allTodos = await agent.get("/todos").set("Accept", "application/json");
+    const csrfToken = extractCSRF(await agent.get("/home"));
+    const newPage = {
+      chapterId :  1,
+      title: "New Page",
+      content: "Description",
+      _csrf: csrfToken,
+    };
 
-//     allTodos = JSON.parse(allTodos.text);
-//     let todosToday = allTodos.duetoday[allTodos.duetoday.length - 1];
+    const createdPage = await agent.post("/addpage").send(newPage);
+    expect(createdPage.statusCode).toBe(302);
+  });
 
-//     const id = todosToday.id;
+  
+  test("Change Password", async () => {
+    await login(agent, email, password);
 
-//     res = await agent.delete(`/todos/${id}`).send({
-//       _csrf: csrfToken,
-//       completed: true,
-//     });
-//     parsedResponse = JSON.parse(res.text);
-//     expect(parsedResponse).toBe(true);
-//   });
+    const csrfToken = extractCSRF(await agent.get("/home"));
+    const changePass = {
+      userId :  1,
+      newpass: "123456789",
+      cnewpass: "123456789",
+      _csrf: csrfToken,
+    };
 
-//   test("Signout", async () => {
-//     const agent = request.agent(server);
-//     await login(agent, email, password);
-//     let res = await agent.get("/todos");
-//     expect(res.statusCode).toBe(200);
+    const changedPass = await agent.post("/changepass").send(changePass);
+    expect(changedPass.statusCode).toBe(302);
+  });
 
-//     res = await agent.get("/signout");
-//     expect(res.statusCode).toBe(302);
+const stuEmail = "student@1.com"
+const stuRole = "student"
 
-//     res = await agent.get("/todos");
-//     expect(res.statusCode).toBe(302);
-//   });
+  test("Create a student and verify", async () => {
+
+    let r = await agent.get("/signup");
+    csrfToken = extractCSRF(r);
+
+    const res = await agent.post("/personas").send({
+      firstName: firstName,
+      lastName: lastName,
+      email: stuEmail,
+      password: password,
+      role : stuRole,
+      _csrf: csrfToken,
+    });
+
+    expect(res.statusCode).toBe(302);
+     r = await agent.get("/verify/2");
+
+     expect(r.statusCode).toBe(200);
+
+  });
+  
+  test("Enroll into a course", async () => {
+
+    await login(agent, stuEmail, password);
+
+    const csrfToken = extractCSRF(await agent.get("/home"));
+
+    const res = await agent.post("/enroll").send({   
+      studentId:2,
+      teacherId:1,
+      courseId:1,
+      chapterId:1,
+      pageId:-1,
+      completed:false,
+      _csrf : csrfToken
+    });
+
+    expect(res.statusCode).toBe(302);
+     
+  });
+
+  test("Mark a Page Complete", async () => {
+
+    await login(agent, stuEmail, password);
+
+    const csrfToken = extractCSRF(await agent.get("/home"));
+
+    const res = await agent.post("/markpage").send({   
+      studentId:2,
+      teacherId:1,
+      courseId:1,
+      chapterId:1,
+      pageId:1,
+      completed:true,
+      _csrf : csrfToken
+    });
+
+    expect(res.statusCode).toBe(302);
+     
+  });
+  
+  test("Delete Course", async () => {
+
+    await login(agent, email, password);
+
+    const csrfToken = extractCSRF(await agent.get("/home"));
+
+    const res = await agent.get("/delete/course/1").send({   
+      
+    });
+
+    expect(res.statusCode).toBe(302);
+     
+  });
+
+  test("Sign out", async () => {
+    let res = await agent.get("/signout");
+    expect(res.statusCode).toBe(302);
+
+    res = await agent.get("/home");
+    expect(res.statusCode).toBe(302);
+
+  });
+
 });
