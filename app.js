@@ -431,7 +431,9 @@ app.get("/report", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   if (req.accepts("html")) {
     try {
       if (req.user.role === "teacher") {
-        let courses = await Course.findAll({ teacherId: req.user.id });
+        let courses = await Course.findAll({where :{ teacherId: req.user.id }});
+        console.log(courses)
+        console.log("User Courses : ",courses.length)
         let enrolled = await getEnrolled(courses);
         console.log(enrolled);
 
